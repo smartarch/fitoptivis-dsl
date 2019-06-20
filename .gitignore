@@ -1,0 +1,14 @@
+*.swp
+~$$*
+
+*.zip
+*.class
+**/*-gen
+*.xtend
+**/bin
+**/generated
+**/test-bin
+
+**/.gradle
+**/.settings
+**/build

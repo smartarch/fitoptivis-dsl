@@ -1,0 +1,3 @@
+include 'cz.cuni.mff.fitoptivis.dsl'
+include 'cz.cuni.mff.fitoptivis.dsl.ide'
+include 'cz.cuni.mff.fitoptivis.dsl.web'
