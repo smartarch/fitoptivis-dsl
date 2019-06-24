@@ -4,7 +4,7 @@ grammar cz.cuni.mff.fitoptivis.FitLang with org.eclipse.xtext.common.Terminals
 generate fitLang "http://www.cuni.cz/mff/fitoptivis/FitLang"
 
 Model:
-	entities+=Entity*;
+	elements+=Element*;
 	
 Comparison_Operator:
 	'==' | '<' | '>' | '<=' | '>=' | '!='
@@ -30,19 +30,27 @@ Unary_Operator:
 	'-' | '+'
 ;
 	
-Entity:
-	Component | Environment | DataChannel;
+Element:
+	Component | Budget | DataChannel | System;
 	
 Component:
 	'component' name=ID '{' componentRules=ComponentRules '}'
 ;
 
-Environment:
-	'environment' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+Budget:
+	'budget' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
 DataChannel:
 	'channel' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+;
+
+System:
+	'system' name=ID '{' ( 
+		subComponents += SubComponentPredicate
+		| independentPredicates += IndependentPredicate
+	)*
+	'}'
 ;
 
 SingleQualityDef:
@@ -78,19 +86,23 @@ ConfigurationBody:
 ;
 
 SupportsPredicate:
-	'supports' environment = [Environment] (name=ID array=ArrayIndex?)?  ';'
+	'supports' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 RequiresPredicate:
-	'requires' environment = [Environment] (name=ID array=ArrayIndex?)? ';'
+	'requires' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 InputsPredicate:
-	'inputs' channel = [DataChannel] (name=ID array=ArrayIndex?)? ';'
+	'inputs' channel = [DataChannel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 OutputsPredicate:
-	'outputs' channel = [DataChannel] (name=ID array=ArrayIndex?)? ';'
+	'outputs' channel = [DataChannel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+;
+
+PredicateBlock:
+	{PredicateBlock}'{' (predicates += Predicate (';' predicates += Predicate)* ';'?)? '}'
 ;
 
 IndependentPredicate:
