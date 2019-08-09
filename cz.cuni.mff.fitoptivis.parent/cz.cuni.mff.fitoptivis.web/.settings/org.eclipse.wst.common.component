@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+	<wb-module deploy-name="cz.cuni.mff.fitoptivis.web">
+		<property name="context-root" value="cz.cuni.mff.fitoptivis.web"/>
+		<wb-resource deploy-path="/WEB-INF/classes" source-path="src"/>
+		<wb-resource deploy-path="/WEB-INF/classes" source-path="src-gen"/>
+		<wb-resource deploy-path="/WEB-INF/classes" source-path="xtend-gen"/>
+		<wb-resource deploy-path="/" source-path="WebRoot"/>
+		<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/cz.cuni.mff.fitoptivis.ide/cz.cuni.mff.fitoptivis.ide">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+		<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/cz.cuni.mff.fitoptivis/cz.cuni.mff.fitoptivis">
+			<dependency-type>uses</dependency-type>
+		</dependent-module>
+	</wb-module>
+</project-modules>
