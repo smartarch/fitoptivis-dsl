@@ -1,14 +1,16 @@
 *.swp
 ~$$*
 
-*.zip
-*.class
-**/*-gen
-*.xtend
-**/bin
-**/generated
-**/test-bin
+generated/
+src-gen/
+xtend-gen/
 
-**/.gradle
-**/.settings
-**/build
+.xml-gen/
+
+.metadata
+
+.gradle
+build/
+**/build/
+
+*.class
