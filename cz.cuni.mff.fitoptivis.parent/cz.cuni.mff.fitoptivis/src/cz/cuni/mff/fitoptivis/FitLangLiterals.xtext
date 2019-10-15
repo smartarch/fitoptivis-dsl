@@ -1,0 +1,25 @@
+grammar cz.cuni.mff.fitoptivis.FitLangLiterals with org.eclipse.xtext.common.Terminals
+
+Comparison_Operator:
+	'==' | '<' | '>' | '<=' | '>=' | '!='
+;
+
+Logical_Binary_Operator:
+	'&&' | '||'
+;
+
+Logical_Not:
+	'!'
+;
+
+Multiplicative_Operator:
+	'*' | '/'
+;
+
+Additive_Operator:
+	'+' | '-'
+;
+
+Unary_Operator:
+	'-' | '+'
+;

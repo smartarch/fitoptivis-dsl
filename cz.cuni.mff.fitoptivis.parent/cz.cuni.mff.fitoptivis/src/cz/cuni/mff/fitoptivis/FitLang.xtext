@@ -1,40 +1,20 @@
-grammar cz.cuni.mff.fitoptivis.FitLang with org.eclipse.xtext.common.Terminals
+grammar cz.cuni.mff.fitoptivis.FitLang with cz.cuni.mff.fitoptivis.FitLangLiterals
 
 generate fitLang "http://www.cuni.cz/mff/fitoptivis/FitLang"
 
+// ***********************
+// 	   Entry point
+// ***********************
+
 Model:
 	elements+=Element*;
-	
-Comparison_Operator:
-	'==' | '<' | '>' | '<=' | '>=' | '!='
-;
-
-Logical_Binary_Operator:
-	'&&' | '||'
-;
-
-Logical_Not:
-	'!'
-;
-
-Multiplicative_Operator:
-	'*' | '/'
-;
-
-Additive_Operator:
-	'+' | '-'
-;
-
-Unary_Operator:
-	'-' | '+'
-;
-	
+			
 Element:
-	Component | Budget | DataChannel | System;
+	Budget | DataChannel | Component | System;
 	
-Component:
-	'component' name=ID '{' componentRules=ComponentRules '}'
-;
+// ***********************
+// 	   Interface ports
+// ***********************
 
 Budget:
 	'budget' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
@@ -44,6 +24,14 @@ DataChannel:
 	'channel' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
+SingleQualityDef:
+	'quality' name=ID ';'
+;
+
+// ***********************
+// 	   	   System
+// ***********************
+
 System:
 	'system' name=ID '{' ( 
 		subComponents += SubComponentPredicate
@@ -52,8 +40,12 @@ System:
 	'}'
 ;
 
-SingleQualityDef:
-	'quality' name=ID ';'
+// ***********************
+// 	   	  Component
+// ***********************
+
+Component:
+	'component' name=ID '{' componentRules=ComponentRules '}'
 ;
 
 ComponentRules:
@@ -84,6 +76,10 @@ ConfigurationBody:
 		)*
 ;
 
+// ***********************
+// 	  	Port declarations
+// ***********************
+
 SupportsPredicate:
 	'supports' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
@@ -99,6 +95,10 @@ InputsPredicate:
 OutputsPredicate:
 	'outputs' channel = [DataChannel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
+
+// ***********************
+// 	   Predicates
+// ***********************
 
 PredicateBlock:
 	{PredicateBlock}'{' (predicates += Predicate (';' predicates += Predicate)* ';'?)? '}'
@@ -154,6 +154,10 @@ AndPredicate:
 OrPredicate:
 	'any' '[' subPredicates += Predicate(',' subPredicates += Predicate)* ','? ']'
 ;
+
+// ***********************
+// 	   Expressions
+// ***********************
 
 BoolExpression:
 	ComparisonExpression 
