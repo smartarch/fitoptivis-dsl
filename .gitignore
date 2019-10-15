@@ -5,7 +5,8 @@ generated/
 src-gen/
 xtend-gen/
 
-.xml-gen/
+*.xml-gen
+*.xml_gen
 
 .metadata
 
@@ -14,3 +15,9 @@ build/
 **/build/
 
 *.class
+
+# the generated fatjar
+cz.cuni.mff.fitoptivis.dsl.jar
+
+*.xtendbin
+bin/

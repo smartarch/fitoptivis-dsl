@@ -21,7 +21,7 @@ Workflow {
 				eclipsePluginTest = {
 					enabled = true
 				}
-				web = {
+				genericIde = {
 					enabled = true
 				}
 				createEclipseMetaData = true
