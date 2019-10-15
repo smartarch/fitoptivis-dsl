@@ -1,4 +1,4 @@
-grammar cz.cuni.mff.fitoptivis.FitLang with cz.cuni.mff.fitoptivis.FitLangLiterals
+grammar cz.cuni.mff.fitoptivis.FitLang with org.eclipse.xtext.common.Terminals
 
 generate fitLang "http://www.cuni.cz/mff/fitoptivis/FitLang"
 
@@ -10,22 +10,84 @@ Model:
 	elements+=Element*;
 			
 Element:
-	Budget | DataChannel | Component | System;
+	VerticalInterface | HorizontalInterface | Component | System;
+	
+// ***********************
+// 	 Terminals/Literals
+// ***********************	
+	
+Comparison_Operator:
+	'==' | '<' | '>' | '<=' | '>=' | '!='
+;
+
+Logical_Binary_Operator:
+	'&&' | '||'
+;
+
+Logical_Not:
+	'!'
+;
+
+Multiplicative_Operator:
+	'*' | '/'
+;
+
+Additive_Operator:
+	'+' | '-'
+;
+
+Unary_Operator:
+	'-' | '+'
+;
+
+VERTICAL_INTERFACE_KEYWORD: 
+	'budget'
+;
+
+VERTICAL_PORT_IN:
+	'requires'
+;
+
+VERTICAL_PORT_OUT:
+	'supports'
+;
+
+HORIZONTAL_INTERFACE_KEYWORD:
+	'channel'
+;
+
+HORIZONTAL_PORT_IN:
+	'inputs'
+;
+
+HORIZONTAL_PORT_OUT:
+	'outputs'
+;
+
+INTERFACE_QUALITY_KEYWORD:
+	'quality'
+;
+
+
+COMPONENT_QUALITY_KEYWORD:
+	'quality' | 'property' | 'parameter'
+;
+	
 	
 // ***********************
 // 	   Interface ports
 // ***********************
 
-Budget:
-	'budget' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+VerticalInterface:
+	VERTICAL_INTERFACE_KEYWORD name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
-DataChannel:
-	'channel' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+HorizontalInterface:
+	HORIZONTAL_INTERFACE_KEYWORD name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
 SingleQualityDef:
-	'quality' name=ID ';'
+	INTERFACE_QUALITY_KEYWORD name=ID ';'
 ;
 
 // ***********************
@@ -81,19 +143,19 @@ ConfigurationBody:
 // ***********************
 
 SupportsPredicate:
-	'supports' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	VERTICAL_PORT_OUT environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 RequiresPredicate:
-	'requires' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	VERTICAL_PORT_IN environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 InputsPredicate:
-	'inputs' channel = [DataChannel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	HORIZONTAL_PORT_IN channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 OutputsPredicate:
-	'outputs' channel = [DataChannel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	HORIZONTAL_PORT_OUT channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 // ***********************
@@ -117,7 +179,7 @@ SubComponentPredicate:
 ;
 
 QualityDeclaration:
-	'quality' name=ID ('=' expr=(Expression))? ';'
+	COMPONENT_QUALITY_KEYWORD name=ID ('=' expr=(Expression))? ';'
 ;
 
 Predicate:	
