@@ -3,10 +3,59 @@
  */
 package cz.cuni.mff.fitoptivis.ui.contentassist
 
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.RuleCall
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
  */
 class FitLangProposalProvider extends AbstractFitLangProposalProvider {
+	
+	override void complete_System(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.complete_System(model, ruleCall, context, acceptor);	
+		acceptor.accept(createCompletionProposal("system", context))
+	}
+	
+	override void complete_Component(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.complete_Component(model, ruleCall, context, acceptor);	
+		acceptor.accept(createCompletionProposal("component", context))
+	}
+	
+	override void complete_InputsPredicate(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_InputsPredicate(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("inputs", context))
+	}
+	
+	override void complete_OutputsPredicate(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_OutputsPredicate(model, ruleCall, context, acceptor);
+		acceptor.accept(createCompletionProposal("outputs", context))
+	}
+	
+	override void complete_RequiresPredicate(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_RequiresPredicate(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("requires", context))
+	}
+	
+	override void complete_SupportsPredicate(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_SupportsPredicate(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("supports", context))
+	}
+	
+	override void complete_HorizontalInterface(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_HorizontalInterface(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("channel", context))
+	}
+	
+	override void complete_VerticalInterface(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {		
+		super.complete_VerticalInterface(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("budget", context))
+	}
+	
+	override void complete_SingleQualityDef(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.complete_SingleQualityDef(model, ruleCall, context, acceptor);		
+		acceptor.accept(createCompletionProposal("quality", context))
+	}
 }

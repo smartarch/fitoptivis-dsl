@@ -40,20 +40,12 @@ Unary_Operator:
 	'-' | '+'
 ;
 
-VERTICAL_INTERFACE_KEYWORD: 
-	'budget'
-;
-
 VERTICAL_PORT_IN:
 	'requires'
 ;
 
 VERTICAL_PORT_OUT:
 	'supports'
-;
-
-HORIZONTAL_INTERFACE_KEYWORD:
-	'channel'
 ;
 
 HORIZONTAL_PORT_IN:
@@ -63,11 +55,6 @@ HORIZONTAL_PORT_IN:
 HORIZONTAL_PORT_OUT:
 	'outputs'
 ;
-
-INTERFACE_QUALITY_KEYWORD:
-	'quality'
-;
-
 
 COMPONENT_QUALITY_KEYWORD:
 	'quality' | 'property' | 'parameter'
@@ -79,15 +66,15 @@ COMPONENT_QUALITY_KEYWORD:
 // ***********************
 
 VerticalInterface:
-	VERTICAL_INTERFACE_KEYWORD name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+	'budget' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
 HorizontalInterface:
-	HORIZONTAL_INTERFACE_KEYWORD name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
+	'channel' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
 SingleQualityDef:
-	INTERFACE_QUALITY_KEYWORD name=ID ';'
+	'quality' name=ID ';'
 ;
 
 // ***********************
@@ -143,19 +130,19 @@ ConfigurationBody:
 // ***********************
 
 SupportsPredicate:
-	VERTICAL_PORT_OUT environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'supports' environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 RequiresPredicate:
-	VERTICAL_PORT_IN environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'requires' environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 InputsPredicate:
-	HORIZONTAL_PORT_IN channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'inputs' channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 OutputsPredicate:
-	HORIZONTAL_PORT_OUT channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'outputs' channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 // ***********************
