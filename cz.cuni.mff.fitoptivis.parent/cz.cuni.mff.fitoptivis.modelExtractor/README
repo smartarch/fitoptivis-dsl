@@ -1,0 +1,22 @@
+This project is CLI application for extracting data about fully defined system element from the DSL text.
+
+Since the DSL text is not contained within files of the file system, the entire DSL code will be received from stdin. 
+Import statements are currently ignored, but due to them existing the API is designed to have both-way communication happening (e.g. the app will demand additional file to be sent over stdin).
+The communication is done over stdin/stdout using simple json objects.
+
+
+DSL Code file object:
+{
+	Name: "Name of object file",
+	Content: "Content of the file"
+}
+
+Result:
+{
+
+}
+
+
+Usage:
+
+ModelExtractor --system $(system_name) < $(dsl_code_file_object)
