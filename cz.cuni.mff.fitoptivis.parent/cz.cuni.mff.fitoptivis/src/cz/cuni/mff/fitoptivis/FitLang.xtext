@@ -40,22 +40,6 @@ Unary_Operator:
 	'-' | '+'
 ;
 
-VERTICAL_PORT_IN:
-	'requires'
-;
-
-VERTICAL_PORT_OUT:
-	'supports'
-;
-
-HORIZONTAL_PORT_IN:
-	'inputs'
-;
-
-HORIZONTAL_PORT_OUT:
-	'outputs'
-;
-
 COMPONENT_QUALITY_KEYWORD:
 	'quality' | 'property' | 'parameter'
 ;

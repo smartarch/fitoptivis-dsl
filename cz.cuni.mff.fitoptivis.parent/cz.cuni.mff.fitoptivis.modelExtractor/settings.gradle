@@ -1,1 +1,3 @@
 include 'cz.cuni.mff.fitoptivis.modelExtractor'
+include ':cz.cuni.mff.fitoptivis'
+project(':cz.cuni.mff.fitoptivis').projectDir = new File("../cz.cuni.mff.fitoptivis/")

@@ -8,6 +8,7 @@ apply plugin: "eclipse"
 
 dependencies {
 	compile "org.json:json:20190722"
+	compile project(":cz.cuni.mff.fitoptivis")
 }
 
 eclipse {
