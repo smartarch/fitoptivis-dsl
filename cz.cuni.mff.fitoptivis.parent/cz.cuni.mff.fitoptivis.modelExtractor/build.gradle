@@ -1,0 +1,24 @@
+repositories {
+	mavenCentral()
+}
+
+apply plugin: "java"
+apply plugin: "eclipse"
+
+
+dependencies {
+	compile "org.json:json:20190722"
+}
+
+eclipse {
+	project.natures "org.eclipse.buildship.core.gradleprojectnature"
+}
+
+sourceSets {
+	main.java.srcDir "src/main"
+}
+
+jar {
+	from configurations.compile.collect { zipTree it }
+	manifest.attributes "Main-Class": "cz.cuni.mff.fitoptivis.modelExtractor.ModelExtractor"
+}
