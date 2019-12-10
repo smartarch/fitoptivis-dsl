@@ -2,9 +2,6 @@ repositories {
 	mavenCentral()
 }
 
-apply plugin: "java"
-apply plugin: "eclipse"
-
 
 dependencies {
 	compile "org.json:json:20190722"

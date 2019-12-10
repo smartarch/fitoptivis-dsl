@@ -1,3 +1,4 @@
 include 'cz.cuni.mff.fitoptivis'
 include 'cz.cuni.mff.fitoptivis.ide'
 include 'cz.cuni.mff.fitoptivis.tests'
+include 'cz.cuni.mff.fitoptivis.modelExtractor'

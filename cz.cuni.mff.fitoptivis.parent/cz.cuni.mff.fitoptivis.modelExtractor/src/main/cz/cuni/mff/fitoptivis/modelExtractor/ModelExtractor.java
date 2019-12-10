@@ -4,7 +4,7 @@ import org.json.JSONTokener;
 import org.json.JSONObject;
 import org.json.JSONException;
 //import cz.cuni.mff.fitoptivis.fitLang.Model;
-//import cz.cuni.mff.fitoptivis.FitLangStandaloneSetup;
+import cz.cuni.mff.fitoptivis.FitLangStandaloneSetup;
 //import org.eclipse.emf.ecore.resource.ResourceSet;
 //import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
