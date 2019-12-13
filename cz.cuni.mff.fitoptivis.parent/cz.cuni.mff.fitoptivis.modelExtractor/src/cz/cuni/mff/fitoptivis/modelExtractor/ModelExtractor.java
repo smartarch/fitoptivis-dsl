@@ -3,10 +3,18 @@ package cz.cuni.mff.fitoptivis.modelExtractor;
 import org.json.JSONTokener;
 import org.json.JSONObject;
 import org.json.JSONException;
-//import cz.cuni.mff.fitoptivis.fitLang.Model;
+
+import java.io.Reader;
+import java.io.StringReader;
+
+import com.google.inject.Injector;
+
+import cz.cuni.mff.fitoptivis.fitLang.Model;
+import cz.cuni.mff.fitoptivis.modelExtractor.data.SystemDescription;
+import cz.cuni.mff.fitoptivis.parser.antlr.FitLangParser;
 import cz.cuni.mff.fitoptivis.FitLangStandaloneSetup;
-//import org.eclipse.emf.ecore.resource.ResourceSet;
-//import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+
+import org.eclipse.xtext.parser.IParseResult;
 
 public class ModelExtractor {
 	
@@ -39,24 +47,13 @@ public class ModelExtractor {
 		return parsedArgs;
 	}	
 	
-	private static DslCode readDslCode() {
-		JSONTokener tokener = new JSONTokener(System.in);		
-
-		try {	
-			JSONObject obj = new JSONObject(tokener);
-			DslCode result = new DslCode();
-			result.name = obj.getString("name");
-			result.content = obj.getString("content");
-			return result;
-			
-		} catch (JSONException e) {
-			return null;
-		}
-	}
-	
-	private static void loadCode() {
-//		new FitLangStandaloneSetup().createInjectorAndDoEMFRegistration();
-//		ResourceSet
+	private static SystemParser setupParser() {
+		CodeLoader loader = new CodeLoader(System.in);
+		ModelRepository repository = new ModelRepository(loader);
+		SystemParser parser = new SystemParser(repository);
+		repository.getModel(SystemParser.DEFAULT_MODEL);
+		
+		return parser;
 	}
 
 	public static void main(String[] args) {		
@@ -66,13 +63,8 @@ public class ModelExtractor {
 			System.exit(1);
 		}
 		
-		final DslCode code = readDslCode();
-		if (code == null) {
-			System.out.println("Could not read the JSON file object. Quitting");
-			System.exit(1);
-		}
-		
-		System.out.println("code: " + code.content);
+		SystemParser parser = setupParser();
+		SystemDescription description = parser.parse(parsedArgs.systemName);		
 	}
 
 }
@@ -80,9 +72,4 @@ public class ModelExtractor {
 class Arguments {
 	public String systemName;
 	public boolean error;
-}
-
-class DslCode {
-	public String name;
-	public String content;
 }

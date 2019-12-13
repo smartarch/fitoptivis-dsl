@@ -7,10 +7,11 @@ generate fitLang "http://www.cuni.cz/mff/fitoptivis/FitLang"
 // ***********************
 
 Model:
-	elements+=Element*;
-			
-Element:
-	VerticalInterface | HorizontalInterface | Component | System;
+	(   budgets += Budget 
+		| channels += Channel
+		| components += Component
+		| systems += System
+		)*; 			
 	
 // ***********************
 // 	 Terminals/Literals
@@ -49,11 +50,11 @@ COMPONENT_QUALITY_KEYWORD:
 // 	   Interface ports
 // ***********************
 
-VerticalInterface:
+Budget:
 	'budget' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
-HorizontalInterface:
+Channel:
 	'channel' name=ID '{' qualityDefinitions+=SingleQualityDef* '}'
 ;
 
@@ -114,19 +115,19 @@ ConfigurationBody:
 // ***********************
 
 SupportsPredicate:
-	'supports' environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'supports' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 RequiresPredicate:
-	'requires' environment = [VerticalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'requires' environment = [Budget] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 InputsPredicate:
-	'inputs' channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'inputs' channel = [Channel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 OutputsPredicate:
-	'outputs' channel = [HorizontalInterface] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
+	'outputs' channel = [Channel] name=ID array=ArrayIndex? predicates=PredicateBlock? ';'
 ;
 
 // ***********************
