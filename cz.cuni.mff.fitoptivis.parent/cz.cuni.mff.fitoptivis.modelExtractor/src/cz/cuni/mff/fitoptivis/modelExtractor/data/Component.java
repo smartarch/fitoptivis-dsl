@@ -24,6 +24,7 @@ public class Component {
 		channelLinks = new ArrayList<Link>();
 		ports = new Ports();
 		name = new IndexedName();
+		configurationName = "Default";
 	}
 	
 	public Map<String, String> getQualities() {
@@ -32,6 +33,10 @@ public class Component {
 
 	public IndexedName getName() {
 		return name;
+	}
+	
+	public void setName(IndexedName name) {
+		this.name = name;
 	}
 	
 	public String getConfigurationName() {
@@ -64,5 +69,9 @@ public class Component {
 	
 	public Ports getPorts() {
 		return ports;
+	}
+	
+	public void addQuality(String qualityName, String qualityValue) {
+		qualities.put(qualityName, qualityValue);
 	}
 }

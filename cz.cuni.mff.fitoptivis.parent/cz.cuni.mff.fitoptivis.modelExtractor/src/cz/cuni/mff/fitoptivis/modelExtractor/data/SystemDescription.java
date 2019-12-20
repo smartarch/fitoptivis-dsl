@@ -62,4 +62,12 @@ public class SystemDescription {
 	public void addError(String error) {
 		errors.add(error);
 	}
+	
+	public Map<String, String> getQualities() {
+		return qualities;
+	}
+	
+	public void addQuality(String name, String value) {
+		qualities.put(name, value);
+	}
 }

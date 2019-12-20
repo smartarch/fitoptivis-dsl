@@ -64,7 +64,9 @@ public class ModelExtractor {
 		}
 		
 		SystemParser parser = setupParser();
-		SystemDescription description = parser.parse(parsedArgs.systemName);		
+		SystemDescription description = parser.parse(parsedArgs.systemName);	
+		String json = SystemDescriptionToJsonConverter.convertToJson(description);
+		System.out.print(json);
 	}
 
 }

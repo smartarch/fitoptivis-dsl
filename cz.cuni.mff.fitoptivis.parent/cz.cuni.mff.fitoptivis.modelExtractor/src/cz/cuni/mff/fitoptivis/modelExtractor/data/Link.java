@@ -5,17 +5,19 @@ import java.util.Map;
 
 public class Link {
 	private IndexedName from;
-	private String fromPort;
+	private IndexedName fromPort;
 	
 	private IndexedName to;
-	private String toPort;
+	private IndexedName toPort;
 	
 	private Map<String, String> qualities;
 	
 	public Link() {
 		qualities = new HashMap<String, String>();
 		from = new IndexedName();
+		fromPort = new IndexedName();
 		to = new IndexedName();
+		toPort = new IndexedName();
 	}
 	
 	public IndexedName getFrom() {
@@ -38,19 +40,19 @@ public class Link {
 		return qualities;
 	}
 
-	public String getToPort() {
+	public IndexedName getToPort() {
 		return toPort;
 	}
 
-	public void setToPort(String toPort) {
+	public void setToPort(IndexedName toPort) {
 		this.toPort = toPort;
 	}
 
-	public String getFromPort() {
+	public IndexedName getFromPort() {
 		return fromPort;
 	}
 
-	public void setFromPort(String fromPort) {
+	public void setFromPort(IndexedName fromPort) {
 		this.fromPort = fromPort;
 	}
 }

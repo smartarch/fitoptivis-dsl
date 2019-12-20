@@ -7,6 +7,7 @@ import java.util.List;
 import cz.cuni.mff.fitoptivis.fitLang.*;
 import cz.cuni.mff.fitoptivis.modelExtractor.data.*;
 import cz.cuni.mff.fitoptivis.modelExtractor.data.Component;
+import static cz.cuni.mff.fitoptivis.modelExtractor.ListUtils.getLast;
 
 public class SystemParser {
 	ModelRepository models;
@@ -34,28 +35,47 @@ public class SystemParser {
 	}
 	
 	private void processSystem(SystemDescription result, cz.cuni.mff.fitoptivis.fitLang.System sys) {
-		for(SubComponentPredicate subcomponent: sys.getSubComponents()) {
-			Component component = new Component();
+		for(SubComponentPredicate subcomponent: sys.getSubComponents()) {			
 			ArrayIndex arrayDef = subcomponent.getArray();
 			if (arrayDef != null) {
-				// an array is defined...
-				//TODO: handle
+				IntLiteral literal = (IntLiteral)arrayDef.getArrayExpr();
+				int arrayLength = literal.getValue();
+				for(int i = 0; i < arrayLength; ++i) {
+					Component component = new Component();
+					IndexedName name = new IndexedName();
+					name.setName(subcomponent.getName());
+					name.setIndex(i);
+					component.setName(name);
+					result.addComponent(component);
+				}				
+			} else {
+				Component component = new Component();
+				IndexedName name = new IndexedName();
+				name.setName(subcomponent.getName());
+				component.setName(name);
+				result.addComponent(component);
 			}
-			component.setName(subcomponent.getName());
-			result.addComponent(component);
 		}		
 		
 		for(IndependentPredicate predicate: sys.getIndependentPredicates()) {
 			if (predicate instanceof RunsOnPredicate) {
-				processRunsOnPredicate(result, (RunsOnPredicate) predicate);				
-						
+				processRunsOnPredicate(result, (RunsOnPredicate) predicate);
+			}
+			else if (predicate instanceof OutputsToPredicate) {
+				processOutputsToPredicate(result, (OutputsToPredicate) predicate);
+			} else if (predicate instanceof ConfiguredAsPredicate) {
+				processConfiguredAsPredicate(result, (ConfiguredAsPredicate) predicate);
+			} else if (predicate instanceof BoolExpression) {
+				processBoolExpressionPredicate(result, (BoolExpression) predicate);
 			}
 		}
 	}
-	
-	private void processRunsOnPredicate(SystemDescription result, RunsOnPredicate predicate) {
-		Component host = findComponent(result, predicate.getHost(), 1);
-		Component guest = findComponent(result, predicate.getGuest(), 1);
+		
+	private void processRunsOnPredicate(SystemDescription result, RunsOnPredicate predicate) {		
+		List<IndexedName> hostQualityPath = parseQualityExpression(predicate.getHost());
+		List<IndexedName> guestQualityPath = parseQualityExpression(predicate.getGuest());
+		Component host = findComponent(result, hostQualityPath, 1);
+		Component guest = findComponent(result, guestQualityPath, 1);
 		
 		if (host == null || guest == null) {
 			result.addError("Cannot find component linked in predicate: " + predicate.toString());
@@ -65,15 +85,86 @@ public class SystemParser {
 		Link link = new Link();
 		link.setFrom(host.getName());
 		link.setTo(guest.getName());
-		link.setFromPort();
-		link.setToPort();
+		link.setFromPort(getLast(hostQualityPath));
+		link.setToPort(getLast(guestQualityPath));
 		
 		result.addBudgetLink(link);
 	}
 	
-	private Component findComponent(SystemDescription result, QualityExpression expression, int toSkipFromEnd) {
+	private void processOutputsToPredicate(SystemDescription result, OutputsToPredicate predicate) {		
+		List<IndexedName> producerQualityPath = parseQualityExpression(predicate.getProducer());
+		List<IndexedName> consumerQualityPath = parseQualityExpression(predicate.getConsumer());
+		Component producer = findComponent(result, producerQualityPath, 1);
+		Component consumer = findComponent(result, consumerQualityPath, 1);
+		
+		if (producer == null || consumer == null) {
+			result.addError("Cannot find component linked in predicate: " + predicate.toString());
+			return;
+		}
+		
+		Link link = new Link();
+		link.setFrom(producer.getName());
+		link.setTo(consumer.getName());
+		link.setFromPort(getLast(producerQualityPath));
+		link.setToPort(getLast(consumerQualityPath));
+		
+		result.addChannelLink(link);
+	}	
+	
+	private void processConfiguredAsPredicate(SystemDescription result, ConfiguredAsPredicate predicate) {
+		List<IndexedName> componentPath = parseQualityExpression(predicate.getComponent());
+		Component component = findComponent(result, componentPath, 0);
+		
+		if (component == null) {
+			result.addError("Cannot find component linked in predicate: " + predicate.toString());
+			return;
+		}
+		
+		component.setConfigurationName(predicate.getConfiguration());
+	}
+	
+	private void processBoolExpressionPredicate(SystemDescription result, BoolExpression predicate) {
+		// only dealing with qualityPath = Literal
+		if (!predicate.getOp().equals("==")) {
+			result.addError("Can only process == predicates");
+			return;
+		}
+		if (!(predicate.getLeft() instanceof QualityExpression) || !(predicate.getRight() instanceof Literal)) {
+			result.addError("Can only process qualityPath == literal predicates");
+			return;
+		}
+		
+		String qualityValue;		
+		Literal literal = (Literal) predicate.getRight();
+		if (literal instanceof IntLiteral) {
+			qualityValue = Integer.toString(((IntLiteral) literal).getValue());
+		} else if (literal instanceof StringLiteral) {
+			qualityValue = ((StringLiteral)literal).getText();
+		} else {
+			throw new RuntimeException("Unhandled predicate type");
+		}
+		
+		QualityExpression path = (QualityExpression)predicate.getLeft();
+		List<IndexedName> parsedPath = parseQualityExpression(path);
+		if (parsedPath.size() == 1) { // it's system quality, not component quality
+			result.addQuality(parsedPath.get(0).toString(), qualityValue);
+		} else {
+			Component component = findComponent(result, parsedPath, -1);
+			if (component == null) {
+				result.addError("Cannot find component linked in predicate: " + path.toString());
+				return;
+			}
+			String qualityName = getLast(parsedPath).toString();
+			
+			
+			component.addQuality(qualityName, qualityValue);
+		}		
+	}
+	
+	// helper methods
+	
+	private Component findComponent(SystemDescription result, List<IndexedName> qualityPath, int toSkipFromEnd) {
 		List<Component> components = result.getComponents();
-		List<IndexedName> qualityPath = parseQualityExpression(expression);
 		Component candidate = null;
 		
 		for(int i = 0; i < qualityPath.size() - toSkipFromEnd; ++i) {
@@ -87,7 +178,7 @@ public class SystemParser {
 		
 		return candidate;
 	}
-	
+		
 	private Component findComponent(List<Component> components, IndexedName name) {
 		for(Component c: components) {
 			if (name.equals(c.getName()))

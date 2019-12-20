@@ -46,4 +46,13 @@ public class IndexedName {
 				&& index == other.index
 				&& java.util.Objects.equals(name, other.name);
 	}
+	
+	@Override
+	public String toString() {
+		if (hasIndex) {
+			return name + "[" + index + "]";
+		} else {
+			return name;
+		}			
+	}
 }
