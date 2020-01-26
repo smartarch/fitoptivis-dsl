@@ -16,7 +16,8 @@ public class SystemDescriptionToJsonConverter {
 			for(String err: errors) {
 				result.append("Errors", err);
 			}
-			result.put("System", (Object)null);
+			//result.put("System", (Object)null);
+			result.put("System", processValidSystemDescription(description));
 		} else {
 			result.put("Errors", new JSONArray());
 			result.put("System", processValidSystemDescription(description));

@@ -16,8 +16,9 @@ public class CodeLoader {
 	public DslCode loadCode(String name) {	
 		DslCode result = new DslCode();
 		
-		if (name != null) {
+		if (!name.equals("DEFAULT")) {
 			// TODO: request additional file
+			return null;
 		}
 		
 		try {	

@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.parser.IParseResult;
 
 import com.google.inject.Injector;
@@ -44,11 +45,18 @@ public class ModelRepository {
 		Model model;
 		
 		if (result.hasSyntaxErrors()) {
+			System.err.println("Got syntax errors in the result");
+			for(INode error: result.getSyntaxErrors()) {
+				String err = error.getText();
+				System.err.println("Error (" + error.getStartLine() + ":" + error.getLength() + "): " + err);
+			}
+			
 			model = null;
 		} else {
 			model = (Model)result.getRootASTElement();
 		}		
 		
 		models.put(code.name, model);
+		models.put(modelName, model);
 	}
 }

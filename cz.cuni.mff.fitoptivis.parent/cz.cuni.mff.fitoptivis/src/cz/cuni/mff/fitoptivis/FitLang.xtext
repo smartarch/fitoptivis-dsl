@@ -161,7 +161,8 @@ Predicate:
 	(
 		(({InPredicate.quality=current} 'in' array=(SubExpression | InlineArrayExpression))
 			| ({RunsOnPredicate.guest=current} 'runs' 'on' host=QualityExpression)
-			| ({OutputsToPredicate.producer=current} 'outputs' 'to' consumer=QualityExpression))
+			| ({OutputsToPredicate.producer=current} 'outputs' 'to' consumer=QualityExpression)
+			| ({ConfiguredAsPredicate.component=current} 'configured' 'as' configuration=ID))
 		|
 		(
 			({MultiplicativeExpression.left=current} op=Multiplicative_Operator right=MultiplicativeExpression)?

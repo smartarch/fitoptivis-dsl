@@ -34,7 +34,7 @@ public class ModelExtractor {
 						parsedArgs.error = true;
 						continue;
 					}
-					parsedArgs.systemName = args[i];
+					parsedArgs.systemName = args[i + 1];
 					i++;
 					break;
 				default:
