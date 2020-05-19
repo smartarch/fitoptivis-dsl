@@ -15,6 +15,7 @@ public class SystemParser {
 	ModelRepository models;
 	
 	public static final String DEFAULT_MODEL = "DEFAULT";
+	public static final String DEFAULT_CONFIGURATION = "default";
 	
 	private class Metadata {
 		public Model defaultModel;
@@ -94,7 +95,7 @@ public class SystemParser {
 		ConfigurationDescription description = new ConfigurationDescription();
 		description.name = configuration.getName();
 		if (description.name == null)
-			description.name = "Default";
+			description.name = DEFAULT_CONFIGURATION;
 		
 		ConfigurationBody body = configuration.getConfigBody();
 		for(InputsPredicate input: body.getInputs()) {
@@ -121,6 +122,10 @@ public class SystemParser {
 			port.name = requires.getName();
 			description.requiresPorts.add(port);
 		}
+		for(QualityPredicate quality: body.getQualities()) {
+			QualityDeclaration q = (QualityDeclaration)quality;
+			description.qualities.add(q.getName());
+		}
 		
 		result.configurations.put(description.name, description);
 	}
@@ -138,6 +143,7 @@ public class SystemParser {
 					name.setIndex(i);
 					component.setName(name);
 					component.setType(subcomponent.getType().getName());
+					component.setConfigurationName(DEFAULT_CONFIGURATION);
 					result.addComponent(component);
 				}				
 			} else {
@@ -146,6 +152,7 @@ public class SystemParser {
 				name.setName(subcomponent.getName());
 				component.setName(name);
 				component.setType(subcomponent.getType().getName());
+				component.setConfigurationName(DEFAULT_CONFIGURATION);
 				result.addComponent(component);
 			}
 		}	
@@ -242,11 +249,12 @@ public class SystemParser {
 		}
 		
 		QualityExpression path = (QualityExpression)predicate.getLeft();
+		
 		List<IndexedName> parsedPath = parseQualityExpression(path);
 		if (parsedPath.size() == 1) { // it's system quality, not component quality
 			result.addQuality(parsedPath.get(0).toString(), qualityValue);
 		} else {
-			Component component = findComponent(result, parsedPath, -1);
+			Component component = findComponent(result, parsedPath, 1);
 			if (component == null) {
 				result.addError("Cannot find component linked in predicate: " + path.toString());
 				return;
