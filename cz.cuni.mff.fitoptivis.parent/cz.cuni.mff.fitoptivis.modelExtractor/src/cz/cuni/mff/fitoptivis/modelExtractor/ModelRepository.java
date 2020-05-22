@@ -1,31 +1,43 @@
 package cz.cuni.mff.fitoptivis.modelExtractor;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
+import org.eclipse.xtext.linking.ILinker;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.parser.IParseResult;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.resource.XtextResourceFactory;
+import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.google.inject.Injector;
 
 import cz.cuni.mff.fitoptivis.FitLangStandaloneSetup;
 import cz.cuni.mff.fitoptivis.fitLang.Model;
 import cz.cuni.mff.fitoptivis.parser.antlr.FitLangParser;
+import cz.cuni.mff.fitoptivis.scoping.FitLangScopeProvider;
 
 // maintains cache of parsed Models
 public class ModelRepository {
 	Map<String, Model> models;
 	CodeLoader loader;
-	FitLangParser parser;
+	XtextResourceSet resourceSet;
 	
 	public ModelRepository(CodeLoader loader) {
 		models = new HashMap<String, Model>();
 		this.loader = loader; 
 		
-		Injector injector = new FitLangStandaloneSetup().createInjectorAndDoEMFRegistration();		
-		parser = injector.getInstance(FitLangParser.class);
+		Injector injector = new FitLangStandaloneSetup().createInjectorAndDoEMFRegistration();				
+		resourceSet = injector.getInstance(XtextResourceSet.class);
+		resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);		
 	}
 	
 	
@@ -39,24 +51,29 @@ public class ModelRepository {
 	private void loadModel(String modelName) {
 		DslCode code = loader.loadCode(modelName);		
 				
-		Reader reader = new StringReader(code.content);
-		IParseResult result = parser.parse(reader);
-		
-		Model model;
-		
-		if (result.hasSyntaxErrors()) {
-			System.err.println("Got syntax errors in the result");
-			for(INode error: result.getSyntaxErrors()) {
-				String err = error.getText();
-				System.err.println("Error (" + error.getStartLine() + ":" + error.getLength() + "): " + err);
-			}
+		InputStream in = new ByteArrayInputStream(code.content.getBytes());
+		Resource resource = resourceSet.createResource(URI.createURI("StdIn:/" + modelName + ".fit"));
+		try {
+			resource.load(in, resourceSet.getLoadOptions());
 			
-			model = null;
-		} else {
-			model = (Model)result.getRootASTElement();
-		}		
+			Model model = (Model) resource.getContents().get(0);
+			
+				
+			if (!resource.getErrors().isEmpty()) {
+				System.err.println("Got syntax errors in the result");
+				for(Diagnostic error: resource.getErrors()) {
+					String err = error.getMessage();
+					System.err.println("Error (" + error.getLine() + ":" + error.getColumn() + "): " + err);
+				}
+			}			
+			
+			models.put(code.name, model);
+			models.put(modelName, model);
+		}
+		catch(IOException e)
+		{
+			// do nothing?
+		}
 		
-		models.put(code.name, model);
-		models.put(modelName, model);
 	}
 }

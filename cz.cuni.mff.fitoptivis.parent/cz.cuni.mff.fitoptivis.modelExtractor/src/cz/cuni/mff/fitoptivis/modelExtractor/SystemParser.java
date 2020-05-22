@@ -71,7 +71,42 @@ public class SystemParser {
 			}
 		}
 		
+		applyMetadata(result, metadata);
+		
 		return result;
+	}
+	
+	private void applyMetadata(SystemDescription result, Metadata metadata) {
+		for(Component component: result.getComponents()) {
+			applyMetadataToComponent(component, metadata);
+		}
+	}
+	
+	private void applyMetadataToComponent(Component component, Metadata metadata) {
+		for(Component subcomponent: component.getSubComponents()) {
+			applyMetadataToComponent(subcomponent, metadata);
+		}
+		
+		ConfigurationDescription description = metadata.components.get(component.getType()).configurations.get(component.getConfigurationName());
+		
+		Ports ports = component.getPorts();
+		
+		copyPortsFromMetadata(ports.getInputs(), description.inputPorts);
+		copyPortsFromMetadata(ports.getOutputs(), description.outputPorts);
+		copyPortsFromMetadata(ports.getRequires(), description.requiresPorts);
+		copyPortsFromMetadata(ports.getSupports(), description.supportsPorts);
+	}
+	
+	private void copyPortsFromMetadata(List<Port> target, List<PortDescription> source) {
+		for(PortDescription port: source) {
+			Port p = new Port();
+			IndexedName name = new IndexedName();
+			name.setName(port.name);			
+			//todo: indexes
+			p.setName(name);
+			p.setType(port.type);
+			target.add(p);
+		}
 	}
 	
 	private void processComponentDescription(cz.cuni.mff.fitoptivis.fitLang.Component component, Metadata metadata) {
@@ -106,7 +141,9 @@ public class SystemParser {
 		}
 		for(OutputsPredicate output: body.getOutputs()) {
 			PortDescription port = new PortDescription();
-			port.type = output.getChannel().getName();
+			port.type = output
+					.getChannel()
+					.getName();
 			port.name = output.getName();
 			description.outputPorts.add(port);
 		}
@@ -129,6 +166,18 @@ public class SystemParser {
 		
 		result.configurations.put(description.name, description);
 	}
+	
+	private void processSubcomponent(SystemDescription result, SubComponentPredicate subcomponent, IndexedName name, Metadata metadata) {
+		
+		Component component = new Component();
+		
+		component.setName(name);
+		String componentType = subcomponent.getType().getName();
+		component.setType(componentType);
+		component.setConfigurationName(DEFAULT_CONFIGURATION);
+		
+		result.addComponent(component);
+	}
 		
 	private void processSystem(SystemDescription result, cz.cuni.mff.fitoptivis.fitLang.System sys, Metadata metadata) {
 		for(SubComponentPredicate subcomponent: sys.getSubComponents()) {			
@@ -137,23 +186,15 @@ public class SystemParser {
 				IntLiteral literal = (IntLiteral)arrayDef.getArrayExpr();
 				int arrayLength = literal.getValue();
 				for(int i = 0; i < arrayLength; ++i) {
-					Component component = new Component();
 					IndexedName name = new IndexedName();
 					name.setName(subcomponent.getName());
 					name.setIndex(i);
-					component.setName(name);
-					component.setType(subcomponent.getType().getName());
-					component.setConfigurationName(DEFAULT_CONFIGURATION);
-					result.addComponent(component);
+					processSubcomponent(result, subcomponent, name, metadata);
 				}				
 			} else {
-				Component component = new Component();
 				IndexedName name = new IndexedName();
 				name.setName(subcomponent.getName());
-				component.setName(name);
-				component.setType(subcomponent.getType().getName());
-				component.setConfigurationName(DEFAULT_CONFIGURATION);
-				result.addComponent(component);
+				processSubcomponent(result, subcomponent, name, metadata);
 			}
 		}	
 		
