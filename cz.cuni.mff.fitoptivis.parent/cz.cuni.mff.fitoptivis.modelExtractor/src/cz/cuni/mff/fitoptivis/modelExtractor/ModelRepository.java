@@ -52,7 +52,7 @@ public class ModelRepository {
 		DslCode code = loader.loadCode(modelName);		
 				
 		InputStream in = new ByteArrayInputStream(code.content.getBytes());
-		Resource resource = resourceSet.createResource(URI.createURI("StdIn:/" + modelName + ".fit"));
+		Resource resource = resourceSet.createResource(URI.createURI("stdin:/" + modelName + ".fit"));
 		try {
 			resource.load(in, resourceSet.getLoadOptions());
 			
