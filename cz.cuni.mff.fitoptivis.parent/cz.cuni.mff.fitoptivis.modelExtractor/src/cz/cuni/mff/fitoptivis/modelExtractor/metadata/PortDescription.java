@@ -1,4 +1,4 @@
-package cz.cuni.mff.fitoptivis.modelExtractor;
+package cz.cuni.mff.fitoptivis.modelExtractor.metadata;
 
 public class PortDescription {
 	public String type;

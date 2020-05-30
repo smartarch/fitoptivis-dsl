@@ -1,4 +1,4 @@
-package cz.cuni.mff.fitoptivis.modelExtractor;
+package cz.cuni.mff.fitoptivis.modelExtractor.metadata;
 
 import java.util.List;
 import java.util.ArrayList;

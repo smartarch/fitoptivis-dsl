@@ -9,6 +9,11 @@ import java.util.Map;
 import cz.cuni.mff.fitoptivis.fitLang.*;
 import cz.cuni.mff.fitoptivis.modelExtractor.data.*;
 import cz.cuni.mff.fitoptivis.modelExtractor.data.Component;
+import cz.cuni.mff.fitoptivis.modelExtractor.metadata.ComponentDescription;
+import cz.cuni.mff.fitoptivis.modelExtractor.metadata.ConfigurationDescription;
+import cz.cuni.mff.fitoptivis.modelExtractor.metadata.InterfaceDescription;
+import cz.cuni.mff.fitoptivis.modelExtractor.metadata.PortDescription;
+
 import static cz.cuni.mff.fitoptivis.modelExtractor.ListUtils.getLast;
 
 public class SystemParser {

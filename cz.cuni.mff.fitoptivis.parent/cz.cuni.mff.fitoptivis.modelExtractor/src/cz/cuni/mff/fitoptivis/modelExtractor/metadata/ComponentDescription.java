@@ -1,4 +1,4 @@
-package cz.cuni.mff.fitoptivis.modelExtractor;
+package cz.cuni.mff.fitoptivis.modelExtractor.metadata;
 
 import java.util.Map;
 import java.util.HashMap;
