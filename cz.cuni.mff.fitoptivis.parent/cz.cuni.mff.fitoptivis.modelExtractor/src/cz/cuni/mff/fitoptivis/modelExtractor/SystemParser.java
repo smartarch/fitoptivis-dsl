@@ -95,6 +95,7 @@ public class SystemParser {
 		copyPortsFromMetadata(ports.getOutputs(), description.outputPorts);
 		copyPortsFromMetadata(ports.getRequires(), description.requiresPorts);
 		copyPortsFromMetadata(ports.getSupports(), description.supportsPorts);
+		copyQualitiesFromMetadata(component, description);
 	}
 	
 	private void copyPortsFromMetadata(List<Port> target, List<PortDescription> source) {
@@ -107,6 +108,12 @@ public class SystemParser {
 			p.setType(port.type);
 			target.add(p);
 		}
+	}
+	
+	private void copyQualitiesFromMetadata(Component component, ConfigurationDescription metadata) {
+		for(String quality: metadata.qualities) {
+			component.addQuality(quality, "");
+		}		
 	}
 	
 	private void processComponentDescription(cz.cuni.mff.fitoptivis.fitLang.Component component, Metadata metadata) {
@@ -163,6 +170,7 @@ public class SystemParser {
 			QualityDeclaration q = (QualityDeclaration)quality;
 			description.qualities.add(q.getName());
 		}
+		//TODO: subcomponents
 		
 		result.configurations.put(description.name, description);
 	}
