@@ -13,7 +13,7 @@ public class ConfigurationDescription {
 	public List<PortDescription> requiresPorts;
 	public List<String> qualities;
 	
-	public Map<String, String> subcomponents;
+	public Map<String, String> subcomponents; // name -> type
 	public Map<String, String> subcomponentConfigurations;
 	public List<LinkDescription> runsOnLinks;
 	public List<LinkDescription> outputsToLinks;
@@ -29,6 +29,6 @@ public class ConfigurationDescription {
 		subcomponents = new HashMap<>();
 		subcomponentConfigurations = new HashMap<>();
 		runsOnLinks = new ArrayList<>();
-		outputPorts = new ArrayList<>();
+		outputsToLinks = new ArrayList<>();
 	}
 }

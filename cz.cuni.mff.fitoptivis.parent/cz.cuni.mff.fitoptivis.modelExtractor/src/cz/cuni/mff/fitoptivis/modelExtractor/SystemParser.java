@@ -12,6 +12,7 @@ import cz.cuni.mff.fitoptivis.modelExtractor.data.Component;
 import cz.cuni.mff.fitoptivis.modelExtractor.metadata.ComponentDescription;
 import cz.cuni.mff.fitoptivis.modelExtractor.metadata.ConfigurationDescription;
 import cz.cuni.mff.fitoptivis.modelExtractor.metadata.InterfaceDescription;
+import cz.cuni.mff.fitoptivis.modelExtractor.metadata.LinkDescription;
 import cz.cuni.mff.fitoptivis.modelExtractor.metadata.PortDescription;
 
 import static cz.cuni.mff.fitoptivis.modelExtractor.ListUtils.getLast;
@@ -67,7 +68,7 @@ public class SystemParser {
 		}
 		
 		for(cz.cuni.mff.fitoptivis.fitLang.Component component: metadata.defaultModel.getComponents()) {
-			processComponentDescription(component, metadata);
+			processComponentDescription(result, component, metadata);
 		}
 		
 		for(cz.cuni.mff.fitoptivis.fitLang.System sys: metadata.defaultModel.getSystems()) {
@@ -101,6 +102,74 @@ public class SystemParser {
 		copyPortsFromMetadata(ports.getRequires(), description.requiresPorts);
 		copyPortsFromMetadata(ports.getSupports(), description.supportsPorts);
 		copyQualitiesFromMetadata(component, description);
+		addSubcomponentsFromMetadata(component, description, metadata);
+	}
+	
+	private void addSubcomponentsFromMetadata(Component component, ConfigurationDescription description, Metadata metadata) {
+		List<Component> subcomponents = component.getSubComponents();
+		
+		// add subcomponents - type, name, configuration, qualities, ports, subcomponents of subcomponents (recursively)
+		for(String subcomponentName: description.subcomponents.keySet()) {
+			Component subcomponent = new Component();
+			
+			subcomponent.setType(description.subcomponents.get(subcomponentName));
+			
+			IndexedName name = new IndexedName();
+			name.setName(subcomponentName);
+			subcomponent.setName(name);
+			
+			if (description.subcomponentConfigurations.containsKey(subcomponentName))
+				subcomponent.setConfigurationName(description.subcomponentConfigurations.get(subcomponentName));
+			else
+				subcomponent.setConfigurationName(DEFAULT_CONFIGURATION);
+			
+			subcomponents.add(subcomponent);
+			// add ports, qualities, and additional subcomponents
+			applyMetadataToComponent(subcomponent, metadata);
+		}
+		
+		// connect the components
+		List<Link> budgetLinks = component.getBudgetLinks();
+		for (LinkDescription runsOn: description.runsOnLinks) {
+			Link link = new Link();
+			IndexedName from = new IndexedName();
+			IndexedName fromPort = new IndexedName();
+			IndexedName to = new IndexedName();
+			IndexedName toPort = new IndexedName();
+			
+			from.setName(runsOn.from);
+			fromPort.setName(runsOn.fromPort);
+			to.setName(runsOn.to);
+			toPort.setName(runsOn.toPort);
+			
+			link.setFrom(from);
+			link.setFromPort(fromPort);
+			link.setTo(to);
+			link.setToPort(toPort);
+			
+			budgetLinks.add(link);
+		}
+		
+		List<Link> channelLinks = component.getChannelLinks();
+		for (LinkDescription outputsTo: description.outputsToLinks) {
+			Link link = new Link();
+			IndexedName from = new IndexedName();
+			IndexedName fromPort = new IndexedName();
+			IndexedName to = new IndexedName();
+			IndexedName toPort = new IndexedName();
+			
+			from.setName(outputsTo.from);
+			fromPort.setName(outputsTo.fromPort);
+			to.setName(outputsTo.to);
+			toPort.setName(outputsTo.toPort);
+			
+			link.setFrom(from);
+			link.setFromPort(fromPort);
+			link.setTo(to);
+			link.setToPort(toPort);
+			
+			channelLinks.add(link);
+		}
 	}
 	
 	private void copyPortsFromMetadata(List<Port> target, List<PortDescription> source) {
@@ -121,30 +190,114 @@ public class SystemParser {
 		}		
 	}
 	
-	private void processComponentDescription(cz.cuni.mff.fitoptivis.fitLang.Component component, Metadata metadata) {
+	private void processComponentDescription(SystemDescription system, cz.cuni.mff.fitoptivis.fitLang.Component component, Metadata metadata) {
 		ComponentDescription result = new ComponentDescription();
 		
 		result.name = component.getName();
 		ComponentRules rules = component.getComponentRules();
 		if (rules instanceof Configuration) {
-			processComponentConfiguration(result, (Configuration)rules, metadata);
+			processComponentConfiguration(system, result, (Configuration)rules, metadata);
 		} else if (rules instanceof Configurations) {
 			Configurations configs = (Configurations)rules;
 			for(Configuration conf: configs.getConfiguration()) {
-				processComponentConfiguration(result, conf, metadata);
+				processComponentConfiguration(system, result, conf, metadata);
 			}
 		}
 		
 		metadata.components.put(result.name, result);
 	}
 	
-	private void processComponentConfiguration(ComponentDescription result, Configuration configuration, Metadata metadata) {
+	private void processComponentConfiguration(SystemDescription system, ComponentDescription result, Configuration configuration, Metadata metadata) {
 		ConfigurationDescription description = new ConfigurationDescription();
 		description.name = configuration.getName();
 		if (description.name == null)
 			description.name = DEFAULT_CONFIGURATION;
 		
 		ConfigurationBody body = configuration.getConfigBody();
+		// ports
+		processConfigurationPorts(body, description, metadata);		
+		// qualities
+		for(QualityPredicate quality: body.getQualities()) {
+			QualityDeclaration q = (QualityDeclaration)quality;
+			description.qualities.add(q.getName());
+		}
+		//subcomponents
+		for(SubComponentPredicate subcomponent: body.getSubComponents()) {
+			String type = subcomponent.getType().getName();
+			String name = subcomponent.getName(); 
+			description.subcomponents.put(name, type);
+		}	
+		// configurations, runs on, outputs to
+		for(IndependentPredicate predicate: body.getIndependentPredicates()) {
+			if (predicate instanceof ConfiguredAsPredicate) {
+				ConfiguredAsPredicate configuredAs = (ConfiguredAsPredicate)predicate;
+				
+				QualityExpression componentPath = configuredAs.getComponent();
+				String configName = configuredAs.getConfiguration();
+				
+				List<IndexedName> parsedPath = parseQualityExpression(componentPath);
+				// supports only simplest quality expressions
+				String componentName = parsedPath.get(0).getName();
+				
+				description.subcomponentConfigurations.put(componentName, configName);
+			} else if (predicate instanceof RunsOnPredicate) {
+				RunsOnPredicate runsOn = (RunsOnPredicate)predicate;
+				
+				QualityExpression host = runsOn.getHost();
+				QualityExpression guest = runsOn.getGuest();
+				
+				List<IndexedName> hostPath = parseQualityExpression(host);
+				List<IndexedName> guestPath = parseQualityExpression(guest);
+				if (hostPath.size() != 2) {
+					system.addError("HostPath " + serializePath(hostPath) + " is not exactly 2 long");
+					continue;
+				}
+				if (guestPath.size() != 2) {
+					system.addError("GuestPath" + serializePath(guestPath) + " is not exactly 2 long");
+					continue;
+				}
+				
+				LinkDescription linkDescription = new LinkDescription();
+				
+				linkDescription.to = hostPath.get(0).getName();
+				linkDescription.toPort = hostPath.get(1).getName();
+				linkDescription.from = guestPath.get(0).getName();
+				linkDescription.fromPort = guestPath.get(1).getName();
+				
+				description.runsOnLinks.add(linkDescription);
+			} else if (predicate instanceof OutputsToPredicate) {
+				OutputsToPredicate outputsTo = (OutputsToPredicate)predicate;
+				
+				QualityExpression producer = outputsTo.getProducer();
+				QualityExpression consumer = outputsTo.getConsumer();
+				
+				List<IndexedName> producerPath = parseQualityExpression(producer);
+				List<IndexedName> consumerPath = parseQualityExpression(consumer);
+				
+				if (producerPath.size() != 2) {
+					system.addError("ProducerPath " + serializePath(producerPath) + " is not exactly 2 long");
+					continue;
+				}
+				if (consumerPath.size() != 2) {
+					system.addError("ConsumerPath" + serializePath(consumerPath) + " is not exactly 2 long");
+					continue;
+				}
+				
+				LinkDescription linkDescription = new LinkDescription();
+				
+				linkDescription.from = producerPath.get(0).getName();
+				linkDescription.fromPort = producerPath.get(1).getName();
+				linkDescription.to = consumerPath.get(0).getName();
+				linkDescription.toPort = consumerPath.get(1).getName();	
+								
+				description.outputsToLinks.add(linkDescription);
+			}
+		}
+				
+		result.configurations.put(description.name, description);
+	}
+	
+	private void processConfigurationPorts(ConfigurationBody body, ConfigurationDescription description, Metadata metadata) {
 		for(InputsPredicate input: body.getInputs()) {
 			PortDescription port = new PortDescription();
 			port.type = input.getChannel().getName();
@@ -171,13 +324,6 @@ public class SystemParser {
 			port.name = requires.getName();
 			description.requiresPorts.add(port);
 		}
-		for(QualityPredicate quality: body.getQualities()) {
-			QualityDeclaration q = (QualityDeclaration)quality;
-			description.qualities.add(q.getName());
-		}
-		//TODO: subcomponents
-		
-		result.configurations.put(description.name, description);
 	}
 	
 	private void processSubcomponent(SystemDescription result, SubComponentPredicate subcomponent, IndexedName name, Metadata metadata) {
@@ -374,5 +520,22 @@ public class SystemParser {
 		
 		Collections.reverse(reversedResult);		
 		return reversedResult;
+	}
+	
+	private String serializePath(List<IndexedName> path) {
+		// inefficient, not using stringbuilder, too lazy to look up documentation
+		String result = "";
+		
+		for(IndexedName name: path) {
+			if (!result.equals(""))
+				result = result + ".";
+			
+			if (name.hasIndex())
+				result = result + name.getName() + "[" + name.getIndex() + "]";
+			else
+				result = result + name.getName();
+		}
+		
+		return result;
 	}
 }
