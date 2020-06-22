@@ -248,21 +248,30 @@ public class SystemParser {
 				
 				List<IndexedName> hostPath = parseQualityExpression(host);
 				List<IndexedName> guestPath = parseQualityExpression(guest);
-				if (hostPath.size() != 2) {
-					system.addError("HostPath " + serializePath(hostPath) + " is not exactly 2 long");
+				if (hostPath.size() > 2) {
+					system.addError("HostPath " + serializePath(hostPath) + " is not at most 2 long. This tool can't support it.");
 					continue;
 				}
-				if (guestPath.size() != 2) {
-					system.addError("GuestPath" + serializePath(guestPath) + " is not exactly 2 long");
+				if (guestPath.size() > 2) {
+					system.addError("GuestPath" + serializePath(guestPath) + " is not at most 2 long. This tool can't support it.");
 					continue;
 				}
 				
 				LinkDescription linkDescription = new LinkDescription();
-				
-				linkDescription.to = hostPath.get(0).getName();
-				linkDescription.toPort = hostPath.get(1).getName();
-				linkDescription.from = guestPath.get(0).getName();
-				linkDescription.fromPort = guestPath.get(1).getName();
+				if (hostPath.size() == 1) {
+					linkDescription.to = null;
+					linkDescription.toPort = hostPath.get(0).getName();
+				} else {
+					linkDescription.to = hostPath.get(0).getName();
+					linkDescription.toPort = hostPath.get(1).getName();					
+				}
+				if (guestPath.size() == 1) {
+					linkDescription.from = null;
+					linkDescription.fromPort = guestPath.get(0).getName();
+				} else {
+					linkDescription.from = guestPath.get(0).getName();
+					linkDescription.fromPort = guestPath.get(1).getName();					
+				}
 				
 				description.runsOnLinks.add(linkDescription);
 			} else if (predicate instanceof OutputsToPredicate) {
@@ -274,21 +283,31 @@ public class SystemParser {
 				List<IndexedName> producerPath = parseQualityExpression(producer);
 				List<IndexedName> consumerPath = parseQualityExpression(consumer);
 				
-				if (producerPath.size() != 2) {
-					system.addError("ProducerPath " + serializePath(producerPath) + " is not exactly 2 long");
+				if (producerPath.size() > 2) {
+					system.addError("ProducerPath " + serializePath(producerPath) + " is not at most 2 long. This tool can't support it.");
 					continue;
 				}
-				if (consumerPath.size() != 2) {
-					system.addError("ConsumerPath" + serializePath(consumerPath) + " is not exactly 2 long");
+				if (consumerPath.size() > 2) {
+					system.addError("ConsumerPath" + serializePath(consumerPath) + " is not at most 2 long. This tool can't support it.");
 					continue;
 				}
 				
 				LinkDescription linkDescription = new LinkDescription();
 				
-				linkDescription.from = producerPath.get(0).getName();
-				linkDescription.fromPort = producerPath.get(1).getName();
-				linkDescription.to = consumerPath.get(0).getName();
-				linkDescription.toPort = consumerPath.get(1).getName();	
+				if (producerPath.size() == 1) {
+					linkDescription.from = null;
+					linkDescription.fromPort = producerPath.get(0).getName();
+				} else {
+					linkDescription.from = producerPath.get(0).getName();
+					linkDescription.fromPort = producerPath.get(1).getName();					
+				}
+				if (consumerPath.size() == 1) {
+					linkDescription.to = null;
+					linkDescription.toPort = consumerPath.get(0).getName();
+				} else {
+					linkDescription.to = consumerPath.get(0).getName();
+					linkDescription.toPort = consumerPath.get(1).getName();					
+				}
 								
 				description.outputsToLinks.add(linkDescription);
 			}
